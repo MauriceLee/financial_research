@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
 
 def read_csv(file):
@@ -12,7 +13,6 @@ def three_days(data):
     big = 0
     small = 0
     result = []
-
     for d in data:
         if d > last:
             small = 0
@@ -40,14 +40,14 @@ def three_days(data):
 def calc_profit(data, signal):
     pos = 0
     entry = 0
-    total  = 0
+    trades = []
     for i in range(len(data)):
         if signal[i] == 1:
             if pos == 0:
                 entry = data[i]
             elif pos == -1:
                 profit = entry - data[i]
-                total += profit
+                trades.append(profit)
                 entry = data[i]
             pos = 1
         elif signal[i] == -1:
@@ -55,18 +55,38 @@ def calc_profit(data, signal):
                 entry = data[i]
             elif pos == 1:
                 profit = data[i] - entry
-                total += profit
+                trades.append(profit)
                 entry = data[i]
             pos = -1
 
-    return total * 1000
+    return trades
+
+
+def calc_equity(trades):
+    equities = []
+    equity = 0
+    for trade in trades:
+        equity += trade
+        equities.append(equity)
+    return equities
+
+
+def graph_equity(equity):
+    plt.plot(equity)
+    plt.ylabel('equity')
+    plt.xlabel('trades')
+    plt.show()
 
 
 def main():
     data = read_csv('2330.csv')
     signal = three_days(data)
-    total = calc_profit(data, signal)
-    print(total)
+    trades = calc_profit(data, signal)
+    total = sum(trades) * 1000
+    print('總共損益為', total)
+    print('一共有', len(trades), '筆交易')
+    equity = calc_equity(trades)
+    graph_equity(equity)
 
 
 main()
